@@ -1,0 +1,13 @@
+import { defineConfig } from 'tsup';
+
+export default defineConfig({
+  entry: ['src/index.ts'],
+  format: ['esm', 'cjs'],
+  dts: { compilerOptions: { composite: false, incremental: false } },
+  sourcemap: true,
+  clean: true,
+  treeshake: true,
+  target: 'node20',
+  // Keep workspace and third-party deps external; consumers install them.
+  external: ['@pint-ae/core', 'xmlbuilder2', 'zod'],
+});
