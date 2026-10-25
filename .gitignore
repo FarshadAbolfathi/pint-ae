@@ -1,0 +1,12 @@
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+.DS_Store
+.turbo/
+*.log
+npm-debug.log*
+.pnpm-debug.log*
+.idea/
+.vscode/*
+!.vscode/extensions.json
