@@ -1,0 +1,27 @@
+{
+  "name": "pint-ae",
+  "version": "0.1.0",
+  "description": "Command line tool for building and validating UAE PINT AE e-invoices.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "pint-ae": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup"
+  },
+  "dependencies": {
+    "@pint-ae/ae": "workspace:*",
+    "@pint-ae/core": "workspace:*"
+  },
+  "devDependencies": {
+    "tsup": "8.3.5",
+    "typescript": "5.7.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
