@@ -1,0 +1,41 @@
+name: Bug report
+description: Report incorrect behaviour in the SDK or CLI
+labels: [bug]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug, including the actual vs. expected result.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction
+      description: Minimal code, JSON or XML that triggers the problem.
+      render: shell
+    validations:
+      required: true
+  - type: input
+    id: rule-id
+    attributes:
+      label: Related rule ID (if any)
+      description: e.g. ibr-132-ae. Helps us trace validation issues to the spec.
+  - type: input
+    id: version
+    attributes:
+      label: Package version
+    validations:
+      required: true
+  - type: dropdown
+    id: package
+    attributes:
+      label: Which package?
+      options:
+        - '@pint-ae/core'
+        - '@pint-ae/ae'
+        - pint-ae (CLI)
+        - not sure
+    validations:
+      required: true

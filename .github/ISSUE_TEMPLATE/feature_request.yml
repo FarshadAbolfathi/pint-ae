@@ -1,0 +1,22 @@
+name: Feature request
+description: Suggest a capability or rule to add
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / use case
+      description: What are you trying to do that the SDK does not yet support?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+  - type: input
+    id: spec-reference
+    attributes:
+      label: Spec reference
+      description: >-
+        If this concerns a tax rule or code list, link the official PINT AE /
+        FTA source. We do not implement tax rules without an authoritative source.
