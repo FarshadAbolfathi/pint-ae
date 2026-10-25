@@ -13,6 +13,8 @@ export * from './trn.js';
 export * from './vat.js';
 export * from './calc.js';
 export * from './builder.js';
+export * from './json.js';
+export * from './report-format.js';
 export * from './rules/index.js';
 export { toXml } from './xml/toXml.js';
 export { fromXml, parseDocument, XmlParseError } from './xml/fromXml.js';

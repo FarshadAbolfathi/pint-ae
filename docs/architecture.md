@@ -62,7 +62,7 @@ flowchart LR
 
 Because the builder derives the amounts, the documents it produces pass the
 calculation rules by construction; the rules exist to validate documents from
-*any* source (notably, parsed external XML in Milestone 2).
+_any_ source (notably, parsed external XML in Milestone 2).
 
 ## Money
 

@@ -53,7 +53,7 @@ if (!result.ok) {
   console.error(result.report.errors);
 } else {
   const xml = PintAE.toXml(result.document); // UBL 2.1 XML string
-  const report = PintAE.validate(result.document); // structured validation report
+  const report = PintAE.validate(xml); // validate a document or an XML string
   console.log(xml);
   console.log(report.valid); // true
 }
@@ -80,24 +80,40 @@ Every amount is handled with exact decimal arithmetic — never floating point.
 
 ### Implemented rules (Milestone 1)
 
-| Rule         | What it checks                                                        |
-| ------------ | --------------------------------------------------------------------- |
-| `ibr-132-ae` | VAT identifier (TRN) format: 15 digits, starts `1`, ends `03`         |
-| `ibr-147-ae` | Line net amount = qty × (price / base) + charges − allowances         |
-| `ibr-131-ae` | Allowance amount = base × percentage / 100                            |
-| `ibr-146-ae` | Charge amount = base × percentage / 100                               |
-| `ibr-co-10`  | Sum of line net amounts = Σ line net amounts                          |
-| `ibr-co-13`  | Total without VAT = Σ lines − document allowances + document charges  |
-| `ibr-co-15`  | Total with VAT = total without VAT + total VAT                        |
-| `ibr-co-16`  | Amount due = total with VAT − prepaid + rounding                      |
+| Rule         | What it checks                                                       |
+| ------------ | -------------------------------------------------------------------- |
+| `ibr-132-ae` | VAT identifier (TRN) format: 15 digits, starts `1`, ends `03`        |
+| `ibr-147-ae` | Line net amount = qty × (price / base) + charges − allowances        |
+| `ibr-131-ae` | Allowance amount = base × percentage / 100                           |
+| `ibr-146-ae` | Charge amount = base × percentage / 100                              |
+| `ibr-co-10`  | Sum of line net amounts = Σ line net amounts                         |
+| `ibr-co-13`  | Total without VAT = Σ lines − document allowances + document charges |
+| `ibr-co-15`  | Total with VAT = total without VAT + total VAT                       |
+| `ibr-co-16`  | Amount due = total with VAT − prepaid + rounding                     |
 
 ## Packages
 
-| Package                                   | Description                                                      |
-| ----------------------------------------- | ---------------------------------------------------------------- |
-| [`@pint-ae/core`](./packages/core)        | Generic PINT model, money utilities, validation engine, adapters |
-| [`@pint-ae/ae`](./packages/ae)            | UAE profile: TRN, VAT categories, rules, builder, UBL output     |
-| [`pint-ae`](./packages/cli) (CLI)         | Command line tool (scaffold; commands land in M3)                |
+| Package                            | Description                                                      |
+| ---------------------------------- | ---------------------------------------------------------------- |
+| [`@pint-ae/core`](./packages/core) | Generic PINT model, money utilities, validation engine, adapters |
+| [`@pint-ae/ae`](./packages/ae)     | UAE profile: TRN, VAT categories, rules, builder, UBL output     |
+| [`pint-ae`](./packages/cli) (CLI)  | Command line tool: `validate` and `build`                        |
+
+## CLI
+
+```sh
+# Validate a UBL XML invoice against the PINT AE rules
+pint-ae validate invoice.xml           # pretty report; exit 1 if invalid
+pint-ae validate invoice.xml --json    # machine-readable report
+
+# Build a UBL XML invoice from a JSON description
+pint-ae build invoice.json             # XML to stdout
+pint-ae build invoice.json -o out.xml  # write to a file
+pint-ae build invoice.json --json      # the built document as JSON
+```
+
+Exit codes: `0` valid/success, `1` invalid document, `2` usage or I/O error —
+suitable for use in CI pipelines.
 
 ## Development
 
@@ -118,11 +134,12 @@ data flow, and [`docs/adr/`](./docs/adr) for the architecture decision records.
 
 - **M1 — Foundation (done):** monorepo, typed model, money/rounding, validation
   engine, first PINT AE rules, builder, UBL serialisation, docs, CI.
-- **M2 — Parsing & full rules:** parse UBL XML into the typed model, complete
-  PINT AE rule coverage, credit notes, cross-check against the official
-  Schematron.
-- **M3 — CLI:** `pint-ae validate <file>` and `pint-ae build <json>` with JSON
-  and pretty output and non-zero exit codes on errors.
+- **M2 — Parsing (done):** parse UBL XML into the typed model
+  (`PintAE.validate(xml)`, `PintAE.fromXml(xml)`); golden-file tests against the
+  official sample invoices. _Remaining:_ complete PINT AE rule coverage and a
+  cross-check against the official Schematron.
+- **M3 — CLI (done):** `pint-ae validate <file>` and `pint-ae build <json>` with
+  JSON and pretty output and non-zero exit codes on errors.
 - **M4 — Playground:** a React + Vite web page (GitHub Pages) to paste or upload
   XML and see the validation result.
 - **M5 — ASP adapters:** the adapter interface with a mock adapter and an

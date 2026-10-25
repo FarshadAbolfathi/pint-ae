@@ -38,10 +38,15 @@ const parser = new XMLParser({
 
 type XmlNode = Record<string, unknown> | string | undefined;
 
-/** Normalise a possibly-single child into an array. */
-function asArray<T>(value: T | T[] | undefined): T[] {
-  if (value === undefined) return [];
-  return Array.isArray(value) ? value : [value];
+/** Normalise a possibly-single child (or absent child) into an array. */
+function asArray<T>(value: unknown): T[] {
+  if (value === undefined || value === null) return [];
+  return (Array.isArray(value) ? value : [value]) as T[];
+}
+
+/** Children of `node` with local name `name`, always as an array. */
+function children(node: XmlNode, name: string): XmlNode[] {
+  return asArray<XmlNode>(child(node, name));
 }
 
 /** Extract the text content of an element (handling the attribute case). */
@@ -95,7 +100,7 @@ function parseParty(node: XmlNode): Record<string, unknown> {
 
   let vatIdentifier: string | undefined;
   let taxIdentifier: string | undefined;
-  for (const pts of asArray(child(node, 'PartyTaxScheme') as XmlNode[])) {
+  for (const pts of children(node, 'PartyTaxScheme')) {
     const schemeId = text(child(child(pts, 'TaxScheme'), 'ID'));
     const companyId = text(child(pts, 'CompanyID'));
     if (schemeId?.toUpperCase() === 'VAT') vatIdentifier = companyId;
@@ -169,19 +174,19 @@ function parseLine(node: XmlNode, isCreditNote: boolean): Record<string, unknown
       priceAmount: text(child(price, 'PriceAmount')),
       baseQuantity: text(baseQty) ?? '1',
     },
-    allowanceCharges: asArray(child(node, 'AllowanceCharge') as XmlNode[]).map(parseAllowanceCharge),
+    allowanceCharges: children(node, 'AllowanceCharge').map(parseAllowanceCharge),
   };
 }
 
 function parseTaxTotal(node: XmlNode): Record<string, unknown> {
   // An invoice may carry a second TaxTotal for the tax-accounting currency with
   // no breakdown; prefer the one that has a TaxSubtotal.
-  const totals = asArray(node as XmlNode[]);
+  const totals = asArray<XmlNode>(node);
   const primary = totals.find((t) => child(t, 'TaxSubtotal') !== undefined) ?? totals[0];
   return {
     taxAmount: text(child(primary, 'TaxAmount')),
     taxIncluded: text(child(primary, 'TaxIncludedIndicator')) === 'true',
-    subtotals: asArray(child(primary, 'TaxSubtotal') as XmlNode[]).map((s) => ({
+    subtotals: children(primary, 'TaxSubtotal').map((s) => ({
       taxableAmount: text(child(s, 'TaxableAmount')),
       taxAmount: text(child(s, 'TaxAmount')),
       category: parseTaxCategory(child(s, 'TaxCategory')),
@@ -227,9 +232,9 @@ function assembleFromRoot(root: XmlNode, isCreditNote: boolean): Record<string, 
     buyerReference: text(child(root, 'BuyerReference')),
     seller: parseParty(supplier),
     buyer: parseParty(customer),
-    paymentMeans: asArray(child(root, 'PaymentMeans') as XmlNode[]).map(parsePaymentMeans),
-    allowanceCharges: asArray(child(root, 'AllowanceCharge') as XmlNode[]).map(parseAllowanceCharge),
-    lines: asArray(child(root, lineKey) as XmlNode[]).map((l) => parseLine(l, isCreditNote)),
+    paymentMeans: children(root, 'PaymentMeans').map(parsePaymentMeans),
+    allowanceCharges: children(root, 'AllowanceCharge').map(parseAllowanceCharge),
+    lines: children(root, lineKey).map((l) => parseLine(l, isCreditNote)),
     taxTotal: parseTaxTotal(child(root, 'TaxTotal')),
     totals: parseTotals(child(root, 'LegalMonetaryTotal')),
   };
