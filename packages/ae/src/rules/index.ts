@@ -1,5 +1,13 @@
 import { runRules, type Document, type Rule, type ValidationReport } from '@pint-ae/core';
 import { ibr131ae, ibr146ae } from './allowances.js';
+import {
+  alignedIbrp001ae,
+  alignedIbrp002ae,
+  ibr073,
+  ibrCl04,
+  ibrCl14,
+  ibrCl23,
+} from './codelist.js';
 import { ibrCl01 } from './document.js';
 import { ibr125ae, ibr147ae } from './lines.js';
 import { ibr128ae } from './parties.js';
@@ -14,6 +22,12 @@ import { ibr120ae, ibr121ae } from './vat-rules.js';
  */
 export const AE_RULES: readonly Rule<Document>[] = [
   ibrCl01,
+  ibrCl04,
+  ibrCl14,
+  ibrCl23,
+  ibr073,
+  alignedIbrp001ae,
+  alignedIbrp002ae,
   ibr132ae,
   ibr128ae,
   ibr125ae,
@@ -36,6 +50,15 @@ export function validateDocument(doc: Document): ValidationReport {
   return runRules(doc, AE_RULES);
 }
 
+export {
+  ibrCl04,
+  ibrCl14,
+  ibrCl23,
+  ibr073,
+  alignedIbrp001ae,
+  alignedIbrp002ae,
+  isStrictDate,
+} from './codelist.js';
 export {
   ibrCl01,
   ibr120ae,

@@ -6,3 +6,5 @@ spec/pint-ae-billing
 CHANGELOG.md
 # Generated SaxonJS SEF (compiled Schematron) — must match xslt3 output byte-for-byte.
 packages/ae/src/schematron/generated
+# Generated code lists — must match the build-codelists.mjs output.
+packages/ae/src/codelists/generated

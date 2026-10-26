@@ -9,8 +9,14 @@ import { monetaryTotalsSchema } from './totals.js';
 
 /** The default PINT AE Billing customization identifier (IBT-024). */
 export const PINT_AE_CUSTOMIZATION_ID = 'urn:peppol:pint:billing-1@ae-1';
+/** The PINT AE Billing customization identifier (IBT-024). */
+export const PINT_AE_BILLING_CUSTOMIZATION_ID = 'urn:peppol:pint:billing-1@ae-1';
+/** The PINT AE Self-Billing customization identifier (IBT-024). */
+export const PINT_AE_SELFBILLING_CUSTOMIZATION_ID = 'urn:peppol:pint:selfbilling-1@ae-1';
 /** The default Peppol billing profile identifier (IBT-023). */
 export const PEPPOL_BILLING_PROFILE_ID = 'urn:peppol:bis:billing';
+/** The Peppol self-billing profile identifier (IBT-023). */
+export const PEPPOL_SELFBILLING_PROFILE_ID = 'urn:peppol:bis:selfbilling';
 
 /** Fields shared by invoices and credit notes. */
 const documentBase = {

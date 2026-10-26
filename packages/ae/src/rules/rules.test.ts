@@ -349,7 +349,7 @@ describe('validateDocument / AE_RULES', () => {
 
   it('exposes every rule with a non-empty id and text', () => {
     for (const rule of AE_RULES) {
-      expect(rule.id).toMatch(/^ibr-/);
+      expect(rule.id).toMatch(/^(ibr-|aligned-ibrp-)/);
       expect(rule.text.length).toBeGreaterThan(0);
     }
   });
