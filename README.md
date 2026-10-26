@@ -19,6 +19,9 @@ Every validation rule is traceable to the official OpenPeppol PINT AE Billing
 Schematron (v1.0.3). No tax rule, code or cardinality in this repository is
 invented — see [`spec/SOURCES.md`](./spec/SOURCES.md).
 
+**Live demo:** paste or upload an invoice and validate it in your browser at
+**https://farshadabolfathi.github.io/pint-ae/** (the `playground` app).
+
 ## 30-second quick start
 
 ```sh
@@ -103,6 +106,7 @@ Every amount is handled with exact decimal arithmetic — never floating point.
 | [`@pint-ae/core`](./packages/core) | Generic PINT model, money utilities, validation engine, adapters |
 | [`@pint-ae/ae`](./packages/ae)     | UAE profile: TRN, VAT categories, rules, builder, UBL output     |
 | [`pint-ae`](./packages/cli) (CLI)  | Command line tool: `validate` and `build`                        |
+| [`playground`](./apps/playground)  | React + Vite web app (GitHub Pages); paste/upload XML, validate  |
 
 ## CLI
 
@@ -145,8 +149,9 @@ data flow, and [`docs/adr/`](./docs/adr) for the architecture decision records.
   cross-check against the official Schematron.
 - **M3 — CLI (done):** `pint-ae validate <file>` and `pint-ae build <json>` with
   JSON and pretty output and non-zero exit codes on errors.
-- **M4 — Playground:** a React + Vite web page (GitHub Pages) to paste or upload
-  XML and see the validation result.
+- **M4 — Playground (done):** a React + Vite web page (deployed to GitHub Pages)
+  to paste or upload XML and see the validation result, running the SDK entirely
+  in the browser.
 - **M5 — ASP adapters:** the adapter interface with a mock adapter and an
   example integration.
 - **M6 — Second country profile:** prove the generic core with another PINT
