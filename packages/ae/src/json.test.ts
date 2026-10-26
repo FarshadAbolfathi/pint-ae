@@ -7,8 +7,16 @@ import { validateDocument } from './rules/index.js';
 const validInput = {
   kind: 'invoice',
   meta: { id: 'INV-1', issueDate: '2025-01-30' },
-  seller: { name: 'Supplier', vatIdentifier: '100000000000003', address: { country: 'AE' } },
-  buyer: { name: 'Buyer', vatIdentifier: '134567890123003', address: { country: 'AE' } },
+  seller: {
+    name: 'Supplier',
+    vatIdentifier: '100000000000003',
+    address: { countrySubentity: 'DXB', country: 'AE' },
+  },
+  buyer: {
+    name: 'Buyer',
+    vatIdentifier: '134567890123003',
+    address: { countrySubentity: 'AUH', country: 'AE' },
+  },
   lines: [
     {
       quantity: 100,

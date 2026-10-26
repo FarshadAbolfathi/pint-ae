@@ -3,19 +3,21 @@ import { describe, expect, it } from 'vitest';
 import { invoice } from '../builder.js';
 import { ibr131ae, ibr146ae } from './allowances.js';
 import { ibr147ae } from './lines.js';
+import { ibr128ae } from './parties.js';
 import { AE_RULES, validateDocument } from './index.js';
-import { ibrCo10, ibrCo13, ibrCo15, ibrCo16 } from './totals.js';
+import { ibrCo10, ibrCo11, ibrCo12, ibrCo13, ibrCo14, ibrCo15, ibrCo16 } from './totals.js';
 import { ibr132ae } from './trn.js';
+import { ibr120ae } from './vat-rules.js';
 
 const seller = {
   name: 'Supplier Legal Name',
   vatIdentifier: '100000000000003',
-  address: { country: 'AE' },
+  address: { countrySubentity: 'DXB', country: 'AE' },
 };
 const buyer = {
   name: 'Buyer Legal Name',
   vatIdentifier: '134567890123003',
-  address: { country: 'AE' },
+  address: { countrySubentity: 'DXB', country: 'AE' },
 };
 
 /** A fully-consistent invoice (totals computed by the builder). */
@@ -155,6 +157,107 @@ describe('ibr-co-10/13/15/16 (document totals)', () => {
     const doc = clone(validInvoice());
     doc.totals.payableAmount = '999';
     expect(ibrCo16.check(doc)).toEqual([{ path: 'totals.payableAmount' }]);
+  });
+});
+
+describe('ibr-co-11/12 (document allowance & charge totals)', () => {
+  it('pass when the totals match the document allowances/charges', () => {
+    const doc = invoiceWithAllowanceCharge();
+    expect(ibrCo11.check(doc)).toEqual([]);
+    expect(ibrCo12.check(doc)).toEqual([]);
+  });
+
+  it('pass when there are no document allowances/charges and no totals', () => {
+    const doc = validInvoice();
+    expect(ibrCo11.check(doc)).toEqual([]);
+    expect(ibrCo12.check(doc)).toEqual([]);
+  });
+
+  it('ibr-co-11 fails when the allowance total is wrong', () => {
+    const doc = clone(invoiceWithAllowanceCharge());
+    doc.totals.allowanceTotalAmount = '999';
+    expect(ibrCo11.check(doc)).toEqual([{ path: 'totals.allowanceTotalAmount' }]);
+  });
+
+  it('ibr-co-11 fails when allowances exist but the total is omitted', () => {
+    const doc = clone(invoiceWithAllowanceCharge());
+    delete doc.totals.allowanceTotalAmount;
+    expect(ibrCo11.check(doc)).toEqual([{ path: 'totals.allowanceTotalAmount' }]);
+  });
+
+  it('ibr-co-12 fails when the charge total is wrong', () => {
+    const doc = clone(invoiceWithAllowanceCharge());
+    doc.totals.chargeTotalAmount = '999';
+    expect(ibrCo12.check(doc)).toEqual([{ path: 'totals.chargeTotalAmount' }]);
+  });
+
+  it('ibr-co-12 fails when charges exist but the total is omitted', () => {
+    const doc = clone(invoiceWithAllowanceCharge());
+    delete doc.totals.chargeTotalAmount;
+    expect(ibrCo12.check(doc)).toEqual([{ path: 'totals.chargeTotalAmount' }]);
+  });
+});
+
+describe('ibr-co-14 (total VAT = sum of breakdown tax amounts)', () => {
+  it('passes for a consistent document', () => {
+    expect(ibrCo14.check(validInvoice())).toEqual([]);
+  });
+
+  it('fails when the total VAT disagrees with the breakdown', () => {
+    const doc = clone(validInvoice());
+    doc.taxTotal.taxAmount = '999';
+    expect(ibrCo14.check(doc)).toEqual([{ path: 'taxTotal.taxAmount' }]);
+  });
+});
+
+describe('ibr-120-ae (zero-rated breakdown rate)', () => {
+  function zeroRatedInvoice(): Invoice {
+    return invoice()
+      .withMeta({ id: 'INV-Z', issueDate: '2025-01-30' })
+      .seller(seller)
+      .buyer(buyer)
+      .addLine({
+        quantity: 10,
+        unitCode: 'H87',
+        price: 5,
+        item: { name: 'Export', taxCategory: { id: 'Z', percent: 0 } },
+      })
+      .buildOrThrow();
+  }
+
+  it('passes when the zero-rated breakdown rate is 0', () => {
+    expect(ibr120ae.check(zeroRatedInvoice())).toEqual([]);
+  });
+
+  it('fails when a zero-rated breakdown has a non-zero rate', () => {
+    const doc = clone(zeroRatedInvoice());
+    doc.taxTotal.subtotals[0]!.category.percent = '5';
+    expect(ibr120ae.check(doc)).toEqual([{ path: 'taxTotal.subtotals[0].category.percent' }]);
+  });
+});
+
+describe('ibr-128-ae (UAE emirate subdivision)', () => {
+  it('passes for valid emirate codes', () => {
+    expect(ibr128ae.check(validInvoice())).toEqual([]);
+  });
+
+  it('fails when an AE address has a non-emirate subdivision', () => {
+    const doc = clone(validInvoice());
+    doc.buyer.address.countrySubentity = 'XYZ';
+    expect(ibr128ae.check(doc)).toEqual([{ path: 'buyer.address.countrySubentity' }]);
+  });
+
+  it('fails when an AE address is missing the subdivision', () => {
+    const doc = clone(validInvoice());
+    delete doc.seller.address.countrySubentity;
+    expect(ibr128ae.check(doc)).toEqual([{ path: 'seller.address.countrySubentity' }]);
+  });
+
+  it('ignores non-AE addresses', () => {
+    const doc = clone(validInvoice());
+    doc.seller.address.country = 'SA';
+    delete doc.seller.address.countrySubentity;
+    expect(ibr128ae.check(doc)).toEqual([]);
   });
 });
 

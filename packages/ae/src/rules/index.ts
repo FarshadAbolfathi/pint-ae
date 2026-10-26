@@ -1,21 +1,28 @@
 import { runRules, type Document, type Rule, type ValidationReport } from '@pint-ae/core';
 import { ibr131ae, ibr146ae } from './allowances.js';
 import { ibr147ae } from './lines.js';
-import { ibrCo10, ibrCo13, ibrCo15, ibrCo16 } from './totals.js';
+import { ibr128ae } from './parties.js';
+import { ibrCo10, ibrCo11, ibrCo12, ibrCo13, ibrCo14, ibrCo15, ibrCo16 } from './totals.js';
 import { ibr132ae } from './trn.js';
+import { ibr120ae } from './vat-rules.js';
 
 /**
- * The PINT AE business rules implemented so far (Milestone 1). Each rule cites
- * its official identifier from the PINT AE Billing v1.0.3 Schematron
- * (see `spec/SOURCES.md`). More rules are added in later milestones.
+ * The implemented PINT AE business rules. Each rule cites its official
+ * identifier from the PINT AE Billing v1.0.3 Schematron (see `spec/SOURCES.md`)
+ * and carries the assertion text. Coverage grows over successive milestones.
  */
 export const AE_RULES: readonly Rule<Document>[] = [
   ibr132ae,
+  ibr128ae,
   ibr147ae,
   ibr131ae,
   ibr146ae,
+  ibr120ae,
   ibrCo10,
+  ibrCo11,
+  ibrCo12,
   ibrCo13,
+  ibrCo14,
   ibrCo15,
   ibrCo16,
 ];
@@ -25,4 +32,18 @@ export function validateDocument(doc: Document): ValidationReport {
   return runRules(doc, AE_RULES);
 }
 
-export { ibr131ae, ibr132ae, ibr146ae, ibr147ae, ibrCo10, ibrCo13, ibrCo15, ibrCo16 };
+export {
+  ibr120ae,
+  ibr128ae,
+  ibr131ae,
+  ibr132ae,
+  ibr146ae,
+  ibr147ae,
+  ibrCo10,
+  ibrCo11,
+  ibrCo12,
+  ibrCo13,
+  ibrCo14,
+  ibrCo15,
+  ibrCo16,
+};

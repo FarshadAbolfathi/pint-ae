@@ -11,6 +11,7 @@ import { toXml } from './xml/toXml.js';
 
 export * from './trn.js';
 export * from './vat.js';
+export * from './codes.js';
 export * from './calc.js';
 export * from './builder.js';
 export * from './json.js';

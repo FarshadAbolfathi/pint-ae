@@ -78,16 +78,21 @@ Every amount is handled with exact decimal arithmetic — never floating point.
 - **Exact money**: decimal arithmetic with half-up rounding matching the spec.
 - **Monorepo** designed for a generic PINT core with pluggable country profiles.
 
-### Implemented rules (Milestone 1)
+### Implemented rules
 
 | Rule         | What it checks                                                       |
 | ------------ | -------------------------------------------------------------------- |
 | `ibr-132-ae` | VAT identifier (TRN) format: 15 digits, starts `1`, ends `03`        |
+| `ibr-128-ae` | For an `AE` address, the subdivision is a valid emirate code         |
 | `ibr-147-ae` | Line net amount = qty × (price / base) + charges − allowances        |
 | `ibr-131-ae` | Allowance amount = base × percentage / 100                           |
 | `ibr-146-ae` | Charge amount = base × percentage / 100                              |
+| `ibr-120-ae` | A zero-rated VAT breakdown has rate 0                                |
 | `ibr-co-10`  | Sum of line net amounts = Σ line net amounts                         |
+| `ibr-co-11`  | Document allowance total = Σ document-level allowances               |
+| `ibr-co-12`  | Document charge total = Σ document-level charges                     |
 | `ibr-co-13`  | Total without VAT = Σ lines − document allowances + document charges |
+| `ibr-co-14`  | Total VAT = Σ VAT breakdown tax amounts                              |
 | `ibr-co-15`  | Total with VAT = total without VAT + total VAT                       |
 | `ibr-co-16`  | Amount due = total with VAT − prepaid + rounding                     |
 

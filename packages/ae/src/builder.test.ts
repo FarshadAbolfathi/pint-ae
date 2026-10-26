@@ -4,12 +4,12 @@ import { creditNote, invoice } from './builder.js';
 const seller = {
   name: 'Supplier Legal Name',
   vatIdentifier: '100000000000003',
-  address: { country: 'AE' },
+  address: { countrySubentity: 'DXB', country: 'AE' },
 };
 const buyer = {
   name: 'Buyer Legal Name',
   vatIdentifier: '134567890123003',
-  address: { country: 'AE' },
+  address: { countrySubentity: 'DXB', country: 'AE' },
 };
 
 describe('DocumentBuilder', () => {
