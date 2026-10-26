@@ -10,6 +10,8 @@ export default [
       '**/dist/**',
       '**/coverage/**',
       'spec/pint-ae-billing/**',
+      // The playground app has its own TypeScript project and tsc check.
+      'apps/**',
       '**/*.config.{js,ts,mjs,cjs}',
     ],
   },

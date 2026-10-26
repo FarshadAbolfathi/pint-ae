@@ -9,6 +9,9 @@ import { AE_RULES, validateDocument } from './rules/index.js';
 import { fromXml, parseDocument } from './xml/fromXml.js';
 import { toXml } from './xml/toXml.js';
 
+// Re-export the generic core API so `@pint-ae/ae` is a complete entry point
+// (consumers do not need to also depend on `@pint-ae/core` for its types).
+export * from '@pint-ae/core';
 export * from './trn.js';
 export * from './vat.js';
 export * from './codes.js';
