@@ -9,5 +9,5 @@ export default defineConfig({
   treeshake: true,
   target: 'node20',
   // Keep workspace and third-party deps external; consumers install them.
-  external: ['@pint-ae/core', 'xmlbuilder2', 'fast-xml-parser', 'zod'],
+  external: ['@pint-ae/core', 'xmlbuilder2', 'fast-xml-parser', 'zod', 'saxon-js'],
 });

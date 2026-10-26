@@ -14,6 +14,8 @@ export default [
       'apps/**',
       // Standalone runnable examples are not part of a package tsconfig project.
       'examples/**',
+      // Node build scripts.
+      'scripts/**',
       '**/*.config.{js,ts,mjs,cjs}',
     ],
   },

@@ -250,20 +250,33 @@ function schemaReport(error: ZodError): ValidationReport {
   return new ValidationReport(messages);
 }
 
+/** The document kind as detected from a UBL root element. */
+export type DocumentKind = 'invoice' | 'creditNote';
+
+/** Detect whether a UBL XML string is an Invoice or a CreditNote by its root. */
+export function detectDocumentKind(xml: string): DocumentKind {
+  const parsed = parser.parse(xml) as Record<string, unknown>;
+  return 'CreditNote' in parsed ? 'creditNote' : 'invoice';
+}
+
 /**
- * Parse UBL XML into a validated typed document plus a report. On a schema
- * failure `document` is `null` and `report` carries the `schema` messages.
+ * Parse UBL XML into a validated typed document plus a report and the detected
+ * kind. On a schema failure `document` is `null` and `report` carries the
+ * `schema` messages (the kind is still reported).
  */
 export function parseDocument(xml: string): {
   document: Document | null;
   report: ValidationReport;
+  kind: DocumentKind;
 } {
   const parsed = parser.parse(xml) as Record<string, unknown>;
   const isCreditNote = 'CreditNote' in parsed;
+  const kind: DocumentKind = isCreditNote ? 'creditNote' : 'invoice';
   const root = (parsed['Invoice'] ?? parsed['CreditNote']) as XmlNode;
   if (root === undefined) {
     return {
       document: null,
+      kind,
       report: new ValidationReport([
         {
           ruleId: 'schema',
@@ -278,9 +291,9 @@ export function parseDocument(xml: string): {
   const schema = isCreditNote ? creditNoteSchema : invoiceSchema;
   const result = schema.safeParse(assembleFromRoot(root, isCreditNote));
   if (!result.success) {
-    return { document: null, report: schemaReport(result.error) };
+    return { document: null, kind, report: schemaReport(result.error) };
   }
-  return { document: result.data as Document, report: new ValidationReport([]) };
+  return { document: result.data as Document, kind, report: new ValidationReport([]) };
 }
 
 /** Parse UBL XML into a typed document, throwing {@link XmlParseError} if it

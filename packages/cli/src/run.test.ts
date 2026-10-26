@@ -10,7 +10,7 @@ function makeDeps(overrides: Partial<Deps> = {}): { deps: Deps; out: string[]; e
     writeFile: vi.fn(),
     stdout: (s) => void out.push(s),
     stderr: (s) => void err.push(s),
-    validateXml: vi.fn(() => new ValidationReport([])),
+    validateXml: vi.fn(async () => new ValidationReport([])),
     buildFromJson: vi.fn(() => ({
       ok: true,
       document: { kind: 'invoice' } as never,
@@ -28,98 +28,107 @@ const invalidReport = new ValidationReport([
 ]);
 
 describe('run: help & version', () => {
-  it('prints help with no command', () => {
+  it('prints help with no command', async () => {
     const { deps, out } = makeDeps();
-    expect(run([], deps)).toBe(0);
+    expect(await run([], deps)).toBe(0);
     expect(out.join()).toContain('Usage:');
   });
 
-  it('prints version', () => {
+  it('prints version', async () => {
     const { deps, out } = makeDeps();
-    expect(run(['version'], deps)).toBe(0);
+    expect(await run(['version'], deps)).toBe(0);
     expect(out.join()).toContain('pint-ae');
   });
 
-  it('errors on an unknown command', () => {
+  it('errors on an unknown command', async () => {
     const { deps, err } = makeDeps();
-    expect(run(['frobnicate'], deps)).toBe(2);
+    expect(await run(['frobnicate'], deps)).toBe(2);
     expect(err.join()).toContain('Unknown command');
   });
 });
 
 describe('run: validate', () => {
-  it('returns 0 and prints a report for a valid file', () => {
-    const { deps, out } = makeDeps();
-    expect(run(['validate', 'inv.xml'], deps)).toBe(0);
+  it('returns 0 and prints a report for a valid file (full mode by default)', async () => {
+    const validateXml = vi.fn(async () => new ValidationReport([]));
+    const { deps, out } = makeDeps({ validateXml });
+    expect(await run(['validate', 'inv.xml'], deps)).toBe(0);
     expect(out.join()).toContain('ok');
+    expect(validateXml).toHaveBeenCalledWith('<xml/>', 'full');
   });
 
-  it('returns 1 for an invalid document', () => {
-    const { deps } = makeDeps({ validateXml: () => invalidReport });
-    expect(run(['validate', 'inv.xml'], deps)).toBe(1);
+  it('passes fast mode with --fast', async () => {
+    const validateXml = vi.fn(async () => new ValidationReport([]));
+    const { deps } = makeDeps({ validateXml });
+    await run(['validate', 'inv.xml', '--fast'], deps);
+    expect(validateXml).toHaveBeenCalledWith('<xml/>', 'fast');
   });
 
-  it('emits JSON with --json', () => {
+  it('returns 1 for an invalid document', async () => {
+    const { deps } = makeDeps({ validateXml: async () => invalidReport });
+    expect(await run(['validate', 'inv.xml'], deps)).toBe(1);
+  });
+
+  it('emits JSON with --json', async () => {
     const { deps, out } = makeDeps();
-    run(['validate', 'inv.xml', '--json'], deps);
+    await run(['validate', 'inv.xml', '--json'], deps);
     expect(out.join()).toContain('"valid": true');
   });
 
-  it('returns 2 when the file is missing', () => {
+  it('returns 2 when the file is missing', async () => {
     const { deps, err } = makeDeps();
-    expect(run(['validate'], deps)).toBe(2);
+    expect(await run(['validate'], deps)).toBe(2);
     expect(err.join()).toContain('Missing');
   });
 
-  it('returns 2 on an I/O error', () => {
+  it('returns 2 on an I/O error', async () => {
     const { deps, err } = makeDeps({
       readFile: () => {
         throw new Error('ENOENT');
       },
     });
-    expect(run(['validate', 'nope.xml'], deps)).toBe(2);
+    expect(await run(['validate', 'nope.xml'], deps)).toBe(2);
     expect(err.join()).toContain('Cannot read');
   });
 });
 
 describe('run: build', () => {
-  it('prints XML to stdout by default', () => {
+  it('prints XML to stdout by default', async () => {
     const { deps, out } = makeDeps({ readFile: () => '{}' });
-    expect(run(['build', 'in.json'], deps)).toBe(0);
+    expect(await run(['build', 'in.json'], deps)).toBe(0);
     expect(out.join()).toContain('<Invoice/>');
   });
 
-  it('writes to a file with -o', () => {
+  it('writes to a file with -o', async () => {
     const write = vi.fn();
     const { deps, out } = makeDeps({ readFile: () => '{}', writeFile: write });
-    expect(run(['build', 'in.json', '-o', 'out.xml'], deps)).toBe(0);
+    expect(await run(['build', 'in.json', '-o', 'out.xml'], deps)).toBe(0);
     expect(write).toHaveBeenCalledWith('out.xml', '<Invoice/>');
     expect(out.join()).toContain('Wrote out.xml');
   });
 
-  it('emits the document as JSON with --json', () => {
+  it('emits the document as JSON with --json', async () => {
     const { deps, out } = makeDeps({ readFile: () => '{}' });
-    run(['build', 'in.json', '--json'], deps);
+    await run(['build', 'in.json', '--json'], deps);
     expect(out.join()).toContain('"kind": "invoice"');
   });
 
-  it('returns 1 for an invalid build', () => {
+  it('returns 1 for an invalid build', async () => {
     const { deps, err } = makeDeps({
       readFile: () => '{}',
       buildFromJson: () => ({ ok: false, document: null, report: invalidReport }),
     });
-    expect(run(['build', 'in.json'], deps)).toBe(1);
+    expect(await run(['build', 'in.json'], deps)).toBe(1);
     expect(err.join()).toContain('invalid');
   });
 
-  it('returns 2 on invalid JSON', () => {
+  it('returns 2 on invalid JSON', async () => {
     const { deps, err } = makeDeps({ readFile: () => 'not json' });
-    expect(run(['build', 'in.json'], deps)).toBe(2);
+    expect(await run(['build', 'in.json'], deps)).toBe(2);
     expect(err.join()).toContain('Cannot read/parse');
   });
 
-  it('returns 2 when the file is missing', () => {
+  it('returns 2 when the file is missing', async () => {
     const { deps } = makeDeps();
-    expect(run(['build'], deps)).toBe(2);
+    expect(await run(['build'], deps)).toBe(2);
   });
 });

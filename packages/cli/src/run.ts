@@ -7,7 +7,7 @@ export interface Deps {
   writeFile(path: string, data: string): void;
   stdout(s: string): void;
   stderr(s: string): void;
-  validateXml(xml: string): ValidationReport;
+  validateXml(xml: string, mode: 'full' | 'fast'): Promise<ValidationReport>;
   buildFromJson(json: unknown): BuildResult<Document>;
   toXml(doc: Document): string;
   formatReport(report: ValidationReport): string;
@@ -16,9 +16,12 @@ export interface Deps {
 const HELP = `pint-ae — UAE PINT AE e-invoice CLI
 
 Usage:
-  pint-ae validate <file.xml> [--json]
+  pint-ae validate <file.xml> [--fast] [--json]
   pint-ae build <file.json> [--json] [-o <out.xml>]
   pint-ae help | version
+
+Validation runs the official PINT AE Schematron plus the native rules by
+default; --fast runs only the native TypeScript rules.
 
 Exit codes:
   0  success / valid document
@@ -48,8 +51,9 @@ function reportOutput(report: ValidationReport, asJson: boolean, deps: Deps): vo
   );
 }
 
-function cmdValidate(args: string[], deps: Deps): number {
+async function cmdValidate(args: string[], deps: Deps): Promise<number> {
   const asJson = hasFlag(args, '--json');
+  const fast = hasFlag(args, '--fast');
   const file = args[0];
   if (file === undefined) {
     deps.stderr(`Missing <file.xml>.\n\n${HELP}`);
@@ -62,7 +66,7 @@ function cmdValidate(args: string[], deps: Deps): number {
     deps.stderr(`Cannot read ${file}: ${(err as Error).message}\n`);
     return 2;
   }
-  const report = deps.validateXml(xml);
+  const report = await deps.validateXml(xml, fast ? 'fast' : 'full');
   reportOutput(report, asJson, deps);
   return report.valid ? 0 : 1;
 }
@@ -107,7 +111,7 @@ function cmdBuild(args: string[], deps: Deps): number {
 }
 
 /** Run the CLI with the given arguments and return a process exit code. */
-export function run(argv: string[], deps: Deps): number {
+export async function run(argv: string[], deps: Deps): Promise<number> {
   const args = [...argv];
   const command = args.shift();
   switch (command) {
