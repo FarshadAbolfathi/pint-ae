@@ -12,6 +12,8 @@ export default [
       'spec/pint-ae-billing/**',
       // The playground app has its own TypeScript project and tsc check.
       'apps/**',
+      // Standalone runnable examples are not part of a package tsconfig project.
+      'examples/**',
       '**/*.config.{js,ts,mjs,cjs}',
     ],
   },

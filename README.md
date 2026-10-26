@@ -101,12 +101,13 @@ Every amount is handled with exact decimal arithmetic — never floating point.
 
 ## Packages
 
-| Package                            | Description                                                      |
-| ---------------------------------- | ---------------------------------------------------------------- |
-| [`@pint-ae/core`](./packages/core) | Generic PINT model, money utilities, validation engine, adapters |
-| [`@pint-ae/ae`](./packages/ae)     | UAE profile: TRN, VAT categories, rules, builder, UBL output     |
-| [`pint-ae`](./packages/cli) (CLI)  | Command line tool: `validate` and `build`                        |
-| [`playground`](./apps/playground)  | React + Vite web app (GitHub Pages); paste/upload XML, validate  |
+| Package                                            | Description                                                      |
+| -------------------------------------------------- | ---------------------------------------------------------------- |
+| [`@pint-ae/core`](./packages/core)                 | Generic PINT model, money utilities, validation engine, adapters |
+| [`@pint-ae/ae`](./packages/ae)                     | UAE profile: TRN, VAT categories, rules, builder, UBL output     |
+| [`pint-ae`](./packages/cli) (CLI)                  | Command line tool: `validate` and `build`                        |
+| [`@pint-ae/adapter-mock`](./packages/adapter-mock) | Mock ASP adapter for tests and examples                          |
+| [`playground`](./apps/playground)                  | React + Vite web app (GitHub Pages); paste/upload XML, validate  |
 
 ## CLI
 
@@ -123,6 +124,26 @@ pint-ae build invoice.json --json      # the built document as JSON
 
 Exit codes: `0` valid/success, `1` invalid document, `2` usage or I/O error —
 suitable for use in CI pipelines.
+
+## ASP adapters
+
+This SDK builds, serialises and validates invoices; it does **not** transmit to
+the tax authority. Delivery goes through an Accredited Service Provider (ASP),
+behind the small `AspAdapter` interface so any provider can be plugged in:
+
+```ts
+import { MockAspAdapter } from '@pint-ae/adapter-mock';
+import { PintAE } from '@pint-ae/ae';
+
+const { document } = PintAE.invoice()./* … */ build();
+const xml = PintAE.toXml(document!);
+
+const adapter = new MockAspAdapter(); // swap for a real provider's adapter
+const result = await adapter.send(document!, xml);
+console.log(result.accepted, result.reference);
+```
+
+A runnable version is in [`examples/send-with-mock-adapter.ts`](./examples/send-with-mock-adapter.ts).
 
 ## Development
 
@@ -152,8 +173,8 @@ data flow, and [`docs/adr/`](./docs/adr) for the architecture decision records.
 - **M4 — Playground (done):** a React + Vite web page (deployed to GitHub Pages)
   to paste or upload XML and see the validation result, running the SDK entirely
   in the browser.
-- **M5 — ASP adapters:** the adapter interface with a mock adapter and an
-  example integration.
+- **M5 — ASP adapters (done):** the `AspAdapter` interface with a mock adapter
+  (`@pint-ae/adapter-mock`) and a runnable example integration.
 - **M6 — Second country profile:** prove the generic core with another PINT
   jurisdiction.
 

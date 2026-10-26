@@ -14,6 +14,12 @@ importers:
       '@eslint/js':
         specifier: 9.17.0
         version: 9.17.0
+      '@pint-ae/adapter-mock':
+        specifier: workspace:*
+        version: link:packages/adapter-mock
+      '@pint-ae/ae':
+        specifier: workspace:*
+        version: link:packages/ae
       '@types/node':
         specifier: 22.10.5
         version: 22.10.5
@@ -72,6 +78,19 @@ importers:
       vite:
         specifier: 6.0.7
         version: 6.0.7(@types/node@22.10.5)
+
+  packages/adapter-mock:
+    dependencies:
+      '@pint-ae/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      tsup:
+        specifier: 8.3.5
+        version: 8.3.5(postcss@8.5.31)(typescript@5.7.3)
+      typescript:
+        specifier: 5.7.3
+        version: 5.7.3
 
   packages/ae:
     dependencies:

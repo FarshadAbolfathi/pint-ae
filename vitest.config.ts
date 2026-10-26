@@ -14,7 +14,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html', 'lcov'],
-      include: ['packages/core/src/**', 'packages/ae/src/**'],
+      include: ['packages/core/src/**', 'packages/ae/src/**', 'packages/adapter-mock/src/**'],
       exclude: ['**/*.test.ts', '**/index.ts', '**/*.d.ts'],
       thresholds: {
         lines: 90,

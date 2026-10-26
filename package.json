@@ -25,6 +25,8 @@
   "devDependencies": {
     "@changesets/cli": "2.27.11",
     "@eslint/js": "9.17.0",
+    "@pint-ae/adapter-mock": "workspace:*",
+    "@pint-ae/ae": "workspace:*",
     "@types/node": "22.10.5",
     "@typescript-eslint/eslint-plugin": "8.19.1",
     "@typescript-eslint/parser": "8.19.1",
