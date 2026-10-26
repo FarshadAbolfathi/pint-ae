@@ -40,39 +40,47 @@ export interface TaxableInput {
 export interface TaxSubtotalResult {
   taxableAmount: string;
   taxAmount: string;
-  category: { id: string; percent: string };
+  /** `percent` is omitted for categories that carry no rate (e.g. Exempt). */
+  category: { id: string; percent?: string };
 }
 
-function groupKey(categoryId: string, percent: string): string {
-  return `${categoryId}|${percent}`;
+function groupKey(categoryId: string, percent: string | undefined): string {
+  return `${categoryId}|${percent ?? ''}`;
 }
 
 /**
  * Build the VAT breakdown (IBG-23) from the taxable contributions, grouped by
  * (category, rate). Tax amount for each group is taxable × rate / 100, rounded
- * to 2dp (`ibr-co-17` style). Document-level allowances reduce, and charges
- * increase, their group's taxable amount.
+ * to 2dp. A contribution with no percent keeps the rate absent in the output
+ * (so Exempt breakdowns carry no rate, per `ibr-121-ae`); the tax amount is
+ * then zero. Document-level allowances reduce, and charges increase, their
+ * group's taxable amount.
  */
 export function buildTaxSubtotals(contributions: readonly TaxableInput[]): TaxSubtotalResult[] {
-  const groups = new Map<string, { categoryId: string; percent: string; taxable: MoneyValue }>();
+  const groups = new Map<
+    string,
+    { categoryId: string; percent: string | undefined; taxable: MoneyValue }
+  >();
   for (const c of contributions) {
-    const percent = c.percent ?? '0';
-    const key = groupKey(c.categoryId, percent);
+    const key = groupKey(c.categoryId, c.percent);
     const existing = groups.get(key);
     if (existing) {
       existing.taxable = existing.taxable.plus(money(c.net));
     } else {
-      groups.set(key, { categoryId: c.categoryId, percent, taxable: money(c.net) });
+      groups.set(key, { categoryId: c.categoryId, percent: c.percent, taxable: money(c.net) });
     }
   }
 
   return [...groups.values()].map((g) => {
     const taxableAmount = round(g.taxable);
-    const taxAmount = round(taxableAmount.times(money(g.percent)).dividedBy(100));
+    const taxAmount =
+      g.percent === undefined
+        ? round(0)
+        : round(taxableAmount.times(money(g.percent)).dividedBy(100));
     return {
       taxableAmount: taxableAmount.toString(),
       taxAmount: taxAmount.toString(),
-      category: { id: g.categoryId, percent: g.percent },
+      category: { id: g.categoryId, ...(g.percent !== undefined ? { percent: g.percent } : {}) },
     };
   });
 }

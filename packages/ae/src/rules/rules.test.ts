@@ -1,13 +1,14 @@
 import type { Document, Invoice } from '@pint-ae/core';
 import { describe, expect, it } from 'vitest';
-import { invoice } from '../builder.js';
+import { creditNote, invoice } from '../builder.js';
 import { ibr131ae, ibr146ae } from './allowances.js';
-import { ibr147ae } from './lines.js';
+import { ibrCl01 } from './document.js';
+import { ibr125ae, ibr147ae } from './lines.js';
 import { ibr128ae } from './parties.js';
 import { AE_RULES, validateDocument } from './index.js';
 import { ibrCo10, ibrCo11, ibrCo12, ibrCo13, ibrCo14, ibrCo15, ibrCo16 } from './totals.js';
 import { ibr132ae } from './trn.js';
-import { ibr120ae } from './vat-rules.js';
+import { ibr120ae, ibr121ae } from './vat-rules.js';
 
 const seller = {
   name: 'Supplier Legal Name',
@@ -30,7 +31,7 @@ function validInvoice(): Invoice {
       quantity: 100,
       unitCode: 'H87',
       price: { amount: 10 },
-      item: { name: 'Item', taxCategory: { id: 'S', percent: 5 } },
+      item: { name: 'Item', description: 'Item', taxCategory: { id: 'S', percent: 5 } },
     })
     .buildOrThrow();
 }
@@ -45,7 +46,7 @@ function invoiceWithAllowanceCharge(): Invoice {
       quantity: 100,
       unitCode: 'H87',
       price: { amount: 10 },
-      item: { name: 'Item', taxCategory: { id: 'S', percent: 5 } },
+      item: { name: 'Item', description: 'Item', taxCategory: { id: 'S', percent: 5 } },
     })
     .addAllowanceCharge({
       isCharge: false,
@@ -220,7 +221,7 @@ describe('ibr-120-ae (zero-rated breakdown rate)', () => {
         quantity: 10,
         unitCode: 'H87',
         price: 5,
-        item: { name: 'Export', taxCategory: { id: 'Z', percent: 0 } },
+        item: { name: 'Export', description: 'Export', taxCategory: { id: 'Z', percent: 0 } },
       })
       .buildOrThrow();
   }
@@ -258,6 +259,75 @@ describe('ibr-128-ae (UAE emirate subdivision)', () => {
     doc.seller.address.country = 'SA';
     delete doc.seller.address.countrySubentity;
     expect(ibr128ae.check(doc)).toEqual([]);
+  });
+});
+
+describe('ibr-125-ae (item description required)', () => {
+  it('passes when every line has a description', () => {
+    expect(ibr125ae.check(validInvoice())).toEqual([]);
+  });
+
+  it('fails when a line is missing its item description', () => {
+    const doc = clone(validInvoice());
+    delete doc.lines[0]!.item.description;
+    expect(ibr125ae.check(doc)).toEqual([{ path: 'lines[0].item.description' }]);
+  });
+});
+
+describe('ibr-121-ae (exempt breakdown has no rate)', () => {
+  function exemptInvoice(): Invoice {
+    return invoice()
+      .withMeta({ id: 'INV-E', issueDate: '2025-01-30' })
+      .seller(seller)
+      .buyer(buyer)
+      .addLine({
+        quantity: 1,
+        unitCode: 'H87',
+        price: 100,
+        item: { name: 'Exempt item', description: 'Exempt item', taxCategory: { id: 'E' } },
+      })
+      .buildOrThrow();
+  }
+
+  it('passes when an exempt breakdown carries no rate', () => {
+    const doc = exemptInvoice();
+    expect(doc.taxTotal.subtotals[0]?.category.percent).toBeUndefined();
+    expect(ibr121ae.check(doc)).toEqual([]);
+  });
+
+  it('fails when an exempt breakdown carries a rate', () => {
+    const doc = clone(exemptInvoice());
+    doc.taxTotal.subtotals[0]!.category.percent = '0';
+    expect(ibr121ae.check(doc)).toEqual([{ path: 'taxTotal.subtotals[0].category.percent' }]);
+  });
+});
+
+describe('ibr-cl-01 (document type code)', () => {
+  it('passes for the default invoice and credit note type codes', () => {
+    expect(ibrCl01.check(validInvoice())).toEqual([]);
+  });
+
+  it('fails for an invoice type code outside UNTDID 1001', () => {
+    const doc = clone(validInvoice());
+    (doc as { invoiceTypeCode: string }).invoiceTypeCode = '999';
+    expect(ibrCl01.check(doc)).toEqual([{ path: 'invoiceTypeCode' }]);
+  });
+
+  it('checks credit note type codes against the credit note list', () => {
+    const cn = creditNote()
+      .withMeta({ id: 'CN-1', issueDate: '2025-02-01' })
+      .seller(seller)
+      .buyer(buyer)
+      .addLine({
+        quantity: 1,
+        unitCode: 'H87',
+        price: 10,
+        item: { name: 'Item', description: 'Item', taxCategory: { id: 'S', percent: 5 } },
+      })
+      .buildOrThrow();
+    expect(ibrCl01.check(cn)).toEqual([]);
+    (cn as { creditNoteTypeCode: string }).creditNoteTypeCode = '380';
+    expect(ibrCl01.check(cn)).toEqual([{ path: 'creditNoteTypeCode' }]);
   });
 });
 

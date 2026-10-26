@@ -47,12 +47,12 @@ describe('buildTaxSubtotals', () => {
     ]);
   });
 
-  it('treats a missing percent as zero', () => {
+  it('omits the rate and charges no tax when the category has no percent', () => {
     const [subtotal] = buildTaxSubtotals([{ net: '100', categoryId: 'E' }]);
     expect(subtotal).toEqual({
       taxableAmount: '100',
       taxAmount: '0',
-      category: { id: 'E', percent: '0' },
+      category: { id: 'E' },
     });
   });
 });

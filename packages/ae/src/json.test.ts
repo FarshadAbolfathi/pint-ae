@@ -22,7 +22,7 @@ const validInput = {
       quantity: 100,
       unitCode: 'H87',
       price: 10,
-      item: { name: 'Widget', taxCategory: { id: 'S', percent: 5 } },
+      item: { name: 'Widget', description: 'Widget', taxCategory: { id: 'S', percent: 5 } },
     },
   ],
 };

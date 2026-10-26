@@ -76,7 +76,7 @@ describe('toXml', () => {
         quantity: 100,
         unitCode: 'H87',
         price: 10,
-        item: { name: 'Item', taxCategory: { id: 'S', percent: 5 } },
+        item: { name: 'Item', description: 'Item', taxCategory: { id: 'S', percent: 5 } },
       })
       .addAllowanceCharge({
         isCharge: false,
@@ -120,7 +120,7 @@ describe('toXml', () => {
         quantity: 1,
         unitCode: 'H87',
         price: 10,
-        item: { name: 'Item', taxCategory: { id: 'S', percent: 5 } },
+        item: { name: 'Item', description: 'Item', taxCategory: { id: 'S', percent: 5 } },
       })
       .buildOrThrow();
     const xml = toXml(cn);

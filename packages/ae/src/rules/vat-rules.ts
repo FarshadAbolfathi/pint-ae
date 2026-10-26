@@ -16,3 +16,19 @@ export const ibr120ae: Rule<Document> = {
       .map(({ index }) => ({ path: `taxTotal.subtotals[${index}].category.percent` }));
   },
 };
+
+/**
+ * ibr-121-ae — In a VAT breakdown (IBG-23) where the VAT category code is
+ * 'Exempt from VAT' (E), the VAT category rate (IBT-119) shall not be provided.
+ */
+export const ibr121ae: Rule<Document> = {
+  id: 'ibr-121-ae',
+  severity: 'fatal',
+  text: "In a VAT breakdown (IBG-23) where VAT category code (IBT-118) is 'Exempt from VAT', VAT category Rate (IBT-119) shall not be provided.",
+  check(doc) {
+    return doc.taxTotal.subtotals
+      .map((s, index) => ({ s, index }))
+      .filter(({ s }) => s.category.id === 'E' && s.category.percent !== undefined)
+      .map(({ index }) => ({ path: `taxTotal.subtotals[${index}].category.percent` }));
+  },
+};

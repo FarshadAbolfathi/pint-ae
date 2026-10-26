@@ -1,10 +1,11 @@
 import { runRules, type Document, type Rule, type ValidationReport } from '@pint-ae/core';
 import { ibr131ae, ibr146ae } from './allowances.js';
-import { ibr147ae } from './lines.js';
+import { ibrCl01 } from './document.js';
+import { ibr125ae, ibr147ae } from './lines.js';
 import { ibr128ae } from './parties.js';
 import { ibrCo10, ibrCo11, ibrCo12, ibrCo13, ibrCo14, ibrCo15, ibrCo16 } from './totals.js';
 import { ibr132ae } from './trn.js';
-import { ibr120ae } from './vat-rules.js';
+import { ibr120ae, ibr121ae } from './vat-rules.js';
 
 /**
  * The implemented PINT AE business rules. Each rule cites its official
@@ -12,12 +13,15 @@ import { ibr120ae } from './vat-rules.js';
  * and carries the assertion text. Coverage grows over successive milestones.
  */
 export const AE_RULES: readonly Rule<Document>[] = [
+  ibrCl01,
   ibr132ae,
   ibr128ae,
+  ibr125ae,
   ibr147ae,
   ibr131ae,
   ibr146ae,
   ibr120ae,
+  ibr121ae,
   ibrCo10,
   ibrCo11,
   ibrCo12,
@@ -33,7 +37,10 @@ export function validateDocument(doc: Document): ValidationReport {
 }
 
 export {
+  ibrCl01,
   ibr120ae,
+  ibr121ae,
+  ibr125ae,
   ibr128ae,
   ibr131ae,
   ibr132ae,

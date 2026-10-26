@@ -27,3 +27,19 @@ export const ibr147ae: Rule<Document> = {
       .map(({ index }) => ({ path: `lines[${index}].lineExtensionAmount` }));
   },
 };
+
+/**
+ * ibr-125-ae — In Item Information (IBG-31), the item description (IBT-154)
+ * MUST be present.
+ */
+export const ibr125ae: Rule<Document> = {
+  id: 'ibr-125-ae',
+  severity: 'fatal',
+  text: 'In Item Information(IBG-31), Item description (IBT-154) MUST be there.',
+  check(doc) {
+    return doc.lines
+      .map((line, index) => ({ line, index }))
+      .filter(({ line }) => line.item.description === undefined)
+      .map(({ index }) => ({ path: `lines[${index}].item.description` }));
+  },
+};

@@ -22,7 +22,7 @@ describe('DocumentBuilder', () => {
         quantity: 100,
         unitCode: 'H87',
         price: { amount: 10 },
-        item: { name: 'Item', taxCategory: { id: 'S', percent: 5 } },
+        item: { name: 'Item', description: 'Item', taxCategory: { id: 'S', percent: 5 } },
       })
       .build();
 
@@ -42,7 +42,7 @@ describe('DocumentBuilder', () => {
         quantity: 2,
         unitCode: 'H87',
         price: 25,
-        item: { name: 'Item', taxCategory: { id: 'Z', percent: 0 } },
+        item: { name: 'Item', description: 'Item', taxCategory: { id: 'Z', percent: 0 } },
       })
       .buildOrThrow();
 
@@ -59,7 +59,7 @@ describe('DocumentBuilder', () => {
         quantity: 1,
         unitCode: 'H87',
         price: 10,
-        item: { name: 'Item', taxCategory: { id: 'S', percent: 5 } },
+        item: { name: 'Item', description: 'Item', taxCategory: { id: 'S', percent: 5 } },
       })
       .build();
 
@@ -79,7 +79,7 @@ describe('DocumentBuilder', () => {
         price: 10,
         // Overriding the net with a wrong value trips ibr-147-ae.
         lineExtensionAmount: 999,
-        item: { name: 'Item', taxCategory: { id: 'S', percent: 5 } },
+        item: { name: 'Item', description: 'Item', taxCategory: { id: 'S', percent: 5 } },
       });
     expect(() => builder.buildOrThrow()).toThrow(/ibr-147-ae/);
   });
@@ -93,7 +93,7 @@ describe('DocumentBuilder', () => {
         quantity: 1,
         unitCode: 'H87',
         price: 10,
-        item: { name: 'Item', taxCategory: { id: 'S', percent: 5 } },
+        item: { name: 'Item', description: 'Item', taxCategory: { id: 'S', percent: 5 } },
       })
       .buildOrThrow();
 
@@ -115,7 +115,7 @@ describe('DocumentBuilder', () => {
         quantity: 100,
         unitCode: 'H87',
         price: 10,
-        item: { name: 'Item', taxCategory: { id: 'S', percent: 5 } },
+        item: { name: 'Item', description: 'Item', taxCategory: { id: 'S', percent: 5 } },
       })
       .buildOrThrow();
 

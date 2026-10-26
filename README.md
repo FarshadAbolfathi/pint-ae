@@ -85,12 +85,15 @@ Every amount is handled with exact decimal arithmetic — never floating point.
 
 | Rule         | What it checks                                                       |
 | ------------ | -------------------------------------------------------------------- |
+| `ibr-cl-01`  | Document type code is a valid UNTDID 1001 invoice/credit-note code   |
 | `ibr-132-ae` | VAT identifier (TRN) format: 15 digits, starts `1`, ends `03`        |
 | `ibr-128-ae` | For an `AE` address, the subdivision is a valid emirate code         |
+| `ibr-125-ae` | Each line item has a description                                     |
 | `ibr-147-ae` | Line net amount = qty × (price / base) + charges − allowances        |
 | `ibr-131-ae` | Allowance amount = base × percentage / 100                           |
 | `ibr-146-ae` | Charge amount = base × percentage / 100                              |
 | `ibr-120-ae` | A zero-rated VAT breakdown has rate 0                                |
+| `ibr-121-ae` | An exempt VAT breakdown carries no rate                              |
 | `ibr-co-10`  | Sum of line net amounts = Σ line net amounts                         |
 | `ibr-co-11`  | Document allowance total = Σ document-level allowances               |
 | `ibr-co-12`  | Document charge total = Σ document-level charges                     |
