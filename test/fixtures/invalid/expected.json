@@ -1,0 +1,10 @@
+{
+  "currency-not-iso4217.xml": ["ibr-co-15", "ibr-126", "ibr-cl-04", "ibr-159-ae", "ibr-175-ae"],
+  "impossible-date.xml": ["ibr-073"],
+  "wrong-customization-id.xml": ["aligned-ibrp-001-ae"],
+  "missing-id.xml": ["schema", "ibr-002"],
+  "wrong-vat-total.xml": ["ibr-co-15", "ibr-co-14"],
+  "invalid-trn.xml": ["ibr-132-ae"],
+  "invalid-unit-code.xml": ["ibr-cl-23"],
+  "invalid-country-code.xml": ["ibr-cl-14", "ibr-cl-15"]
+}
