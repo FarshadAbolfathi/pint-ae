@@ -46,3 +46,15 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+      - name: Verify generated artifacts match the spec
+        run: |
+          node scripts/build-sef.mjs --check
+          node scripts/build-codelists.mjs
+          git diff --exit-code -- packages/ae/src/codelists/generated
+
+      - name: Verify rule coverage report is up to date
+        run: node scripts/rule-coverage.mjs --check
+
+      - name: Check package publishability
+        run: pnpm -r --filter "./packages/*" exec publint

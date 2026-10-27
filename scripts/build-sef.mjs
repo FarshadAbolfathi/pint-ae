@@ -5,12 +5,12 @@
  *
  * The SEF files are generated artifacts — never hand-edit them. Regenerate with:
  *   node scripts/build-sef.mjs
- *
- * CI runs this and fails if the committed SEF files differ from a fresh build,
- * guaranteeing they always match the vendored specification.
+ * Verify the committed SEF match the vendored spec (ignoring the compiler's
+ * build timestamp and integrity hash, which are not reproducible):
+ *   node scripts/build-sef.mjs --check
  */
 import { execFileSync } from 'node:child_process';
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -33,15 +33,44 @@ const targets = [
   },
 ];
 
-mkdirSync(outDir, { recursive: true });
+/** Drop the non-reproducible build timestamp and integrity hash for comparison. */
+function normalize(sef) {
+  return sef
+    .replace(/"buildDateTime":"[^"]*"/, '"buildDateTime":""')
+    .replace(/"Σ":"[^"]*"/, '"Σ":""');
+}
 
-for (const { out, xsl } of targets) {
-  const source = resolve(specDir, xsl);
-  const dest = resolve(outDir, `${out}.sef.json`);
-  process.stdout.write(`Compiling ${xsl} -> ${out}.sef.json\n`);
-  execFileSync(xslt3, [`-xsl:${source}`, `-export:${dest}`, '-nogo'], {
+function compile(outPath, xsl) {
+  execFileSync(xslt3, [`-xsl:${resolve(specDir, xsl)}`, `-export:${outPath}`, '-nogo'], {
     stdio: ['ignore', 'ignore', 'inherit'],
   });
 }
 
-process.stdout.write(`Done. ${targets.length} SEF files written to ${outDir}\n`);
+const check = process.argv.includes('--check');
+
+if (check) {
+  const tmp = resolve(outDir, '.check.tmp.sef.json');
+  let stale = false;
+  for (const { out, xsl } of targets) {
+    compile(tmp, xsl);
+    const fresh = normalize(readFileSync(tmp, 'utf8'));
+    const committed = normalize(readFileSync(resolve(outDir, `${out}.sef.json`), 'utf8'));
+    if (fresh !== committed) {
+      process.stderr.write(`SEF out of date: ${out}.sef.json\n`);
+      stale = true;
+    }
+  }
+  rmSync(tmp, { force: true });
+  if (stale) {
+    process.stderr.write('Run: node scripts/build-sef.mjs\n');
+    process.exit(1);
+  }
+  process.stdout.write('SEF files are up to date.\n');
+} else {
+  mkdirSync(outDir, { recursive: true });
+  for (const { out, xsl } of targets) {
+    process.stdout.write(`Compiling ${xsl} -> ${out}.sef.json\n`);
+    compile(resolve(outDir, `${out}.sef.json`), xsl);
+  }
+  process.stdout.write(`Done. ${targets.length} SEF files written to ${outDir}\n`);
+}

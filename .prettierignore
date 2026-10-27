@@ -8,3 +8,5 @@ CHANGELOG.md
 packages/ae/src/schematron/generated
 # Generated code lists — must match the build-codelists.mjs output.
 packages/ae/src/codelists/generated
+# Generated coverage report — must match scripts/rule-coverage.mjs output.
+docs/rule-coverage.md
