@@ -74,9 +74,10 @@ code and carries the assertion's human-readable message from the Schematron.
 
 ## TODO(spec)
 
-- The compiled `.xslt` Schematron is bundled but not yet executed in tests; the
-  Milestone 2 Schematron cross-check (running the official XSLT over generated
-  XML) is tracked in the README roadmap.
 - UAE Ministry of Finance / FTA primary legislation URLs for the TRN format and
-  mandate dates are not yet linked here; the TRN format currently used is the
-  one enforced by `ibr-132-ae`. Add FTA citations when confirmed.
+  the mandate timeline are not yet linked here. The go-live dates cited in the
+  README (Phase 1 ≥ AED 50M: 1 Jan 2027; Phase 2: 1 Jul 2027; Phase 3
+  government: 1 Oct 2027) come from advisory sources citing Ministerial
+  Decisions 243/244 of 2025 and Ministerial Resolution 66 of 2026; verify them
+  against the MoF primary publication at <https://mof.gov.ae>. The TRN format in
+  use is the one enforced by `ibr-132-ae`.

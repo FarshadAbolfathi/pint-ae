@@ -22,6 +22,29 @@ invented — see [`spec/SOURCES.md`](./spec/SOURCES.md).
 **Live demo:** paste or upload an invoice and validate it in your browser at
 **https://farshadabolfathi.github.io/pint-ae/** (the `playground` app).
 
+## Why this exists
+
+The UAE is rolling out mandatory e-invoicing on the OpenPeppol framework using
+the PINT AE standard, on a phased timeline:
+
+| Phase | Who                               | Go-live        |
+| ----- | --------------------------------- | -------------- |
+| 1     | Businesses with revenue ≥ AED 50M | 1 January 2027 |
+| 2     | Other VAT-registered businesses   | 1 July 2027    |
+| 3     | Government entities               | 1 October 2027 |
+
+Invoices are exchanged through Accredited Service Providers (ASPs). Teams need
+to build PINT AE invoices and check them against the specification well before
+their go-live date. This SDK does that — it builds, serialises, parses and
+validates PINT AE invoices offline — and exposes an adapter interface so any ASP
+can be plugged in. It does **not** transmit to the FTA.
+
+> Dates are from the UAE Ministry of Finance e-invoicing programme as reported
+> by advisory sources citing Ministerial Decisions 243/244 of 2025 and
+> Ministerial Resolution 66 of 2026. `TODO(spec)`: verify against the MoF
+> primary publication at <https://mof.gov.ae> (see
+> [`spec/SOURCES.md`](./spec/SOURCES.md)).
+
 ## 30-second quick start
 
 ```sh
@@ -163,21 +186,21 @@ data flow, and [`docs/adr/`](./docs/adr) for the architecture decision records.
 
 - **M1 — Foundation (done):** monorepo, typed model, money/rounding, validation
   engine, first PINT AE rules, builder, UBL serialisation, docs, CI.
-- **M2 — Parsing (done):** parse UBL XML into the typed model
-  (`PintAE.validate(xml)`, `PintAE.fromXml(xml)`); golden-file tests against the
-  official sample invoices. _Remaining:_ complete PINT AE rule coverage and a
-  cross-check against the official Schematron.
-- **M3 — CLI (done):** `pint-ae validate <file>` and `pint-ae build <json>` with
-  JSON and pretty output and non-zero exit codes on errors.
+- **M2 — Parsing & full rule coverage (done):** parse UBL XML into the model;
+  `full` mode runs the complete official Schematron (303 assertions) via SaxonJS;
+  22 native rules are cross-checked against it; golden-file and invalid-fixture
+  tests. See [`docs/rule-coverage.md`](./docs/rule-coverage.md).
+- **M3 — CLI (done):** `pint-ae validate <file>` (`--fast`) and
+  `pint-ae build <json>` with JSON/pretty output and non-zero exit codes.
 - **M4 — Playground (done):** a React + Vite web page (deployed to GitHub Pages)
-  to paste or upload XML and see the validation result, running the SDK entirely
-  in the browser.
+  to paste or upload XML and see the validation result.
 - **M5 — ASP adapters (done):** the `AspAdapter` interface with a mock adapter
   (`@pint-ae/adapter-mock`) and a runnable example integration.
 - **M6 — Second country profile:** prove the generic core with another PINT
   jurisdiction.
 
-Publishing to npm (via Changesets) is not enabled yet.
+Releasing to npm is set up via Changesets and a tag-triggered workflow but not
+yet published — see [`docs/RELEASING.md`](./docs/RELEASING.md).
 
 ## License
 
