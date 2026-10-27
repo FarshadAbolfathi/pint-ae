@@ -33,11 +33,16 @@ const targets = [
   },
 ];
 
-/** Drop the non-reproducible build timestamp and integrity hash for comparison. */
+/**
+ * Drop the parts of a SEF that are not reproducible across machines/runs so two
+ * builds of the same spec compare equal: the build timestamp, the integrity
+ * hash, and the absolute `file://` path of the source stylesheet.
+ */
 function normalize(sef) {
   return sef
     .replace(/"buildDateTime":"[^"]*"/, '"buildDateTime":""')
-    .replace(/"Σ":"[^"]*"/, '"Σ":""');
+    .replace(/"Σ":"[^"]*"/, '"Σ":""')
+    .replace(/file:\/\/[^"]*?\/spec\/pint-ae-billing\//g, 'file:///spec/pint-ae-billing/');
 }
 
 function compile(outPath, xsl) {
