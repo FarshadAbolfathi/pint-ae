@@ -4,7 +4,6 @@
  * validation path; the native TypeScript rules exist for speed and type safety.
  */
 import type { ValidationMessage } from '@pint-ae/core';
-import SaxonJS from 'saxon-js';
 import { parseSvrl } from './svrl.js';
 
 /** The document kinds the Schematron is bound to. */
@@ -43,6 +42,9 @@ export async function runSchematron(
   kind: SchematronKind,
   loadSef: SefLoader,
 ): Promise<ValidationMessage[]> {
+  // Load SaxonJS lazily so it is only pulled in (and code-split by bundlers)
+  // when `full` validation actually runs.
+  const { default: SaxonJS } = await import('saxon-js');
   const messages: ValidationMessage[] = [];
   for (const name of sefNamesFor(kind)) {
     const stylesheetInternal = await loadSefInternal(name, loadSef);
